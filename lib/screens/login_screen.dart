@@ -45,6 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _loadSavedUserData() async {
     final userData = await UserDataService.getAllUserData();
+    if (!mounted) return;
+
     bool hasData = false;
 
     if (userData['serverUrl'] != null) {
@@ -62,6 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // 加载订阅链接（用于回填）
     final subscriptionUrl = await LocalModeStorageService.getSubscriptionUrl();
+    if (!mounted) return;
+
     if (subscriptionUrl != null && subscriptionUrl.isNotEmpty) {
       _subscriptionUrlController.text = subscriptionUrl;
       hasData = true;
@@ -69,10 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // 如果有数据被加载，更新UI状态
     if (hasData && mounted) {
-      setState(() {
-        // 触发表单验证
-        _validateForm();
-      });
+      _validateForm();
     }
   }
 
@@ -106,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       // 设置新的计时器，2秒后重置计数
       _tapTimer = Timer(const Duration(seconds: 1), () {
+        if (!mounted) return;
         setState(() {
           _logoTapCount = 0;
         });
@@ -114,6 +116,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _validateForm() {
+    if (!mounted) return;
+
     setState(() {
       if (_isLocalMode) {
         _isFormValid = _subscriptionUrlController.text.isNotEmpty;
@@ -274,6 +278,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showToast(String message, Color backgroundColor) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -316,6 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
             'password': _passwordController.text,
           }),
         );
+        if (!mounted) return;
 
         setState(() {
           _isLoading = false;
@@ -334,9 +341,11 @@ class _LoginScreenState extends State<LoginScreen> {
               password: _passwordController.text,
               cookies: cookies,
             );
+            if (!mounted) return;
 
             // 保存模式状态为服务器模式
             await UserDataService.saveIsLocalMode(false);
+            if (!mounted) return;
 
             // _showToast('登录成功！', const Color(0xFF27ae60));
 
@@ -358,6 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _showToast('网络异常', const Color(0xFFe74c3c));
         }
       } catch (e) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
@@ -377,6 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // 获取并解析订阅内容
         final response = await http.get(Uri.parse(newUrl));
+        if (!mounted) return;
 
         if (response.statusCode != 200) {
           setState(() {
@@ -388,6 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         final content =
             await SubscriptionService.parseSubscriptionContent(response.body);
+        if (!mounted) return;
 
         if (content == null || 
             (content.searchResources == null || content.searchResources!.isEmpty) &&
@@ -401,6 +413,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // 检查是否已有订阅 URL
         final existingUrl = await LocalModeStorageService.getSubscriptionUrl();
+        if (!mounted) return;
 
         if (existingUrl != null &&
             existingUrl.isNotEmpty &&
@@ -455,9 +468,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           );
+          if (!mounted) return;
 
           if (shouldClear == true) {
             await LocalModeStorageService.clearAllLocalModeData();
+            if (!mounted) return;
           } else if (shouldClear == null) {
             // 用户取消了对话框
             return;
@@ -470,15 +485,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // 保存订阅链接和内容
         await LocalModeStorageService.saveSubscriptionUrl(newUrl);
+        if (!mounted) return;
         if (content.searchResources != null && content.searchResources!.isNotEmpty) {
           await LocalModeStorageService.saveSearchSources(content.searchResources!);
+          if (!mounted) return;
         }
         if (content.liveSources != null && content.liveSources!.isNotEmpty) {
           await LocalModeStorageService.saveLiveSources(content.liveSources!);
+          if (!mounted) return;
         }
 
         // 保存模式状态为本地模式
         await UserDataService.saveIsLocalMode(true);
+        if (!mounted) return;
 
         setState(() {
           _isLoading = false;
@@ -494,6 +513,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });

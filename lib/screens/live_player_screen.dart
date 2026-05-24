@@ -183,6 +183,8 @@ class _LivePlayerScreenState extends State<LivePlayerScreen>
   }
 
   Future<void> _loadEpgData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoadingEpg = true;
     });
@@ -260,6 +262,7 @@ class _LivePlayerScreenState extends State<LivePlayerScreen>
 
     // 延迟执行，确保列表已经渲染
     Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
       if (!_programScrollController.hasClients) {
         return;
       }
@@ -305,6 +308,7 @@ class _LivePlayerScreenState extends State<LivePlayerScreen>
 
     // 使用 postFrameCallback 确保在渲染完成后立即执行
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (!_verticalProgramScrollController.hasClients) {
         return;
       }
@@ -380,13 +384,20 @@ class _LivePlayerScreenState extends State<LivePlayerScreen>
 
     // 等待 ScrollController 准备好
     if (_channelScrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => performScroll());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        performScroll();
+      });
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         if (_channelScrollController.hasClients) {
           performScroll();
         } else {
-          WidgetsBinding.instance.addPostFrameCallback((_) => performScroll());
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            performScroll();
+          });
         }
       });
     }

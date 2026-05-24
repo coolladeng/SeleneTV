@@ -480,6 +480,7 @@ class _UserMenuState extends State<UserMenu> {
               onPressed: () async {
                 final url = controller.text.trim();
                 await UserDataService.saveM3u8ProxyUrl(url);
+                if (!mounted) return;
                 setState(() {
                   _m3u8ProxyUrl = url;
                 });
@@ -499,7 +500,7 @@ class _UserMenuState extends State<UserMenu> {
           ],
         );
       },
-    );
+    ).whenComplete(controller.dispose);
   }
 
   Widget _buildInputOption({
@@ -609,6 +610,7 @@ class _UserMenuState extends State<UserMenu> {
             GestureDetector(
               onTap: () async {
                 await onChanged(!value);
+                if (!mounted) return;
                 setState(() {});
               },
               child: AnimatedContainer(
@@ -746,6 +748,7 @@ class _UserMenuState extends State<UserMenu> {
                       ],
                       onChanged: (value) async {
                         await UserDataService.saveDoubanDataSource(value);
+                        if (!mounted) return;
                         setState(() {
                           _doubanDataSource = value;
                         });
@@ -771,6 +774,7 @@ class _UserMenuState extends State<UserMenu> {
                       ],
                       onChanged: (value) async {
                         await UserDataService.saveDoubanImageSource(value);
+                        if (!mounted) return;
                         setState(() {
                           _doubanImageSource = value;
                         });
@@ -804,6 +808,7 @@ class _UserMenuState extends State<UserMenu> {
                       value: _preferSpeedTest,
                       onChanged: (value) async {
                         await UserDataService.savePreferSpeedTest(value);
+                        if (!mounted) return;
                         setState(() {
                           _preferSpeedTest = value;
                         });
@@ -824,6 +829,7 @@ class _UserMenuState extends State<UserMenu> {
                         value: _localSearch,
                         onChanged: (value) async {
                           await UserDataService.saveLocalSearch(value);
+                          if (!mounted) return;
                           setState(() {
                             _localSearch = value;
                           });

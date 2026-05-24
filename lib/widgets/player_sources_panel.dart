@@ -60,6 +60,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel>
 
     // 延迟滚动到当前源
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _scrollToCurrentSource();
     });
   }
@@ -116,6 +117,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel>
     try {
       await widget.onRefresh();
     } finally {
+      if (!mounted) return;
       setState(() {
         _isRefreshing = false;
       });

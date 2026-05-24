@@ -47,6 +47,8 @@ class _HotTvSectionState extends State<HotTvSection> {
 
   /// 加载热门剧集
   Future<void> _loadHotTvShows() async {
+    if (!mounted) return;
+
     try {
       setState(() {
         _isLoading = true;
@@ -55,6 +57,7 @@ class _HotTvSectionState extends State<HotTvSection> {
 
       // 直接调用 DoubanService（内部已做函数级缓存）
       final result = await DoubanService.getHotTvShows(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {
@@ -68,6 +71,7 @@ class _HotTvSectionState extends State<HotTvSection> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _hasError = true;
         _isLoading = false;

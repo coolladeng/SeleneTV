@@ -363,6 +363,7 @@ class _MobilePlayerControlsState extends State<MobilePlayerControls> {
     _onUserInteraction();
     if (_isPlaying) {
       await widget.player.pause();
+      if (!mounted) return;
       widget.onPause?.call();
     } else {
       await widget.player.play();
@@ -392,14 +393,16 @@ class _MobilePlayerControlsState extends State<MobilePlayerControls> {
   Future<void> _showDLNADialog() async {
     if (_isPlaying) {
       await widget.player.pause();
+      if (!mounted) return;
       widget.onPause?.call();
     }
     if (_isFullscreen) {
       _exitFullscreen();
       await Future.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
     }
-    final resumePos = widget.player.state.position;
     if (!mounted) return;
+    final resumePos = widget.player.state.position;
     await showDialog(
       context: context,
       builder: (context) => DLNADeviceDialog(
@@ -452,6 +455,7 @@ class _MobilePlayerControlsState extends State<MobilePlayerControls> {
         );
       },
     );
+    if (!mounted) return;
     if (result != null) {
       await widget.onSetSpeed(result);
     }
@@ -1221,11 +1225,10 @@ class _MobileVideoProgressBarState extends State<_MobileVideoProgressBar> {
                 // seek 完成后，延迟一小段时间再允许位置更新，确保播放器状态已同步
                 await Future.delayed(const Duration(milliseconds: 100));
 
-                if (mounted) {
-                  setState(() {
-                    _isSeeking = false; // 标记 seek 完成
-                  });
-                }
+                if (!mounted) return;
+                setState(() {
+                  _isSeeking = false; // 标记 seek 完成
+                });
 
                 widget.onDragEnd?.call();
               }
@@ -1248,11 +1251,10 @@ class _MobileVideoProgressBarState extends State<_MobileVideoProgressBar> {
               // seek 完成后，延迟一小段时间再允许位置更新，确保播放器状态已同步
               await Future.delayed(const Duration(milliseconds: 100));
 
-              if (mounted) {
-                setState(() {
-                  _isSeeking = false; // 标记 seek 完成
-                });
-              }
+              if (!mounted) return;
+              setState(() {
+                _isSeeking = false; // 标记 seek 完成
+              });
 
               widget.onDragEnd?.call();
             },

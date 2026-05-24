@@ -450,6 +450,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             ],
           ),
         );
+        if (!mounted) return;
 
         // 如果用户选择停止，才调用 stop
         if (shouldStop == true) {
@@ -468,6 +469,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
 
     // 关闭页面前保存进度
+    if (!mounted) return;
     _saveProgress(force: true, scene: '返回按钮');
     Navigator.of(context).pop();
   }
@@ -1166,6 +1168,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         ],
       ),
     );
+    if (!mounted) return;
 
     // 如果用户选择停止，才调用 stop
     if (shouldStop == true) {
@@ -1224,6 +1227,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         totalEpisodes: totalEpisodes,
         sourceName: currentDetail?.sourceName ?? currentSource,
         onCastStarted: (device) {
+          if (!mounted) return;
           setState(() {
             _dlnaDevice = device;
           });
@@ -2183,7 +2187,9 @@ class _PlayerScreenState extends State<PlayerScreen>
           );
         },
       ).then((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
       return;
     }
@@ -2229,7 +2235,9 @@ class _PlayerScreenState extends State<PlayerScreen>
     ).then((_) {
       // 面板关闭后强制更新主界面的源卡片显示
       // 这样测速信息就能立即显示在主界面的源卡片上
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

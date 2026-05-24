@@ -1406,12 +1406,11 @@ class _CustomVideoProgressBarState extends State<CustomVideoProgressBar> {
             
             // seek 完成后，延迟一小段时间再允许位置更新，确保播放器状态已同步
             await Future.delayed(const Duration(milliseconds: 100));
-            
-            if (mounted) {
-              setState(() {
-                _isSeeking = false; // 标记 seek 完成
-              });
-            }
+
+            if (!mounted) return;
+            setState(() {
+              _isSeeking = false; // 标记 seek 完成
+            });
             
             widget.onDragEnd?.call();
           }
@@ -1430,12 +1429,11 @@ class _CustomVideoProgressBarState extends State<CustomVideoProgressBar> {
           
           // seek 完成后，延迟一小段时间再允许位置更新，确保播放器状态已同步
           await Future.delayed(const Duration(milliseconds: 100));
-          
-          if (mounted) {
-            setState(() {
-              _isSeeking = false; // 标记 seek 完成
-            });
-          }
+
+          if (!mounted) return;
+          setState(() {
+            _isSeeking = false; // 标记 seek 完成
+          });
           
           widget.onDragEnd?.call();
         },

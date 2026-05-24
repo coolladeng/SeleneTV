@@ -34,6 +34,8 @@ class _DLNADeviceDialogState extends State<DLNADeviceDialog> {
   bool _isScanning = false;
   String _scanStatus = '准备扫描设备...';
   Timer? _scanTimer;
+  StreamSubscription? _devicesSubscription;
+  int _scanGeneration = 0;
 
   @override
   void initState() {
@@ -48,6 +50,10 @@ class _DLNADeviceDialogState extends State<DLNADeviceDialog> {
   }
 
   Future<void> _startScanning() async {
+    if (!mounted) return;
+
+    final scanGeneration = ++_scanGeneration;
+
     try {
       setState(() {
         _isScanning = true;
@@ -56,9 +62,14 @@ class _DLNADeviceDialogState extends State<DLNADeviceDialog> {
 
       _dlnaManager = DLNAManager();
       final manager = await _dlnaManager!.start();
+      if (!mounted || scanGeneration != _scanGeneration) {
+        manager.stop();
+        return;
+      }
       
       // 监听设备发现
-      manager.devices.stream.listen((deviceList) {
+      await _devicesSubscription?.cancel();
+      _devicesSubscription = manager.devices.stream.listen((deviceList) {
         if (mounted) {
           setState(() {
             _devices = deviceList;
@@ -88,7 +99,10 @@ class _DLNADeviceDialogState extends State<DLNADeviceDialog> {
   }
 
   void _stopScanning() {
+    _scanGeneration++;
     _scanTimer?.cancel();
+    _devicesSubscription?.cancel();
+    _devicesSubscription = null;
     _dlnaManager?.stop();
   }
 

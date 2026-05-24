@@ -156,6 +156,7 @@ class _MainLayoutState extends State<MainLayout> {
   void _onSearchQueryChanged(String query) {
     // 使用 post-frame callback 来调用父组件回调，避免在 build 期间触发 setState
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       widget.onSearchQueryChanged?.call(query);
     });
 

@@ -65,6 +65,8 @@ class _FavoritesGridState extends State<FavoritesGrid>
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -76,10 +78,12 @@ class _FavoritesGridState extends State<FavoritesGrid>
         _loadFavorites(),
         _loadPlayRecords(),
       ]);
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -108,13 +112,16 @@ class _FavoritesGridState extends State<FavoritesGrid>
   /// 刷新收藏夹数据
   Future<void> _refreshFavorites() async {
     try {
+      if (!mounted) return;
       // 刷新缓存数据
       await _cacheService.refreshFavorites(context);
+      if (!mounted) return;
 
       // 重新获取收藏夹数据
       final result = await _cacheService.getFavorites(context);
+      if (!mounted) return;
 
-      if (result.success && result.data != null && mounted) {
+      if (result.success && result.data != null) {
         // 只有当新数据与当前数据不同时才更新UI
         if (_favorites.length != result.data!.length ||
             !_isSameFavorites(_favorites, result.data!)) {
@@ -132,8 +139,10 @@ class _FavoritesGridState extends State<FavoritesGrid>
   /// 刷新播放记录数据
   Future<void> _refreshPlayRecords() async {
     try {
+      if (!mounted) return;
       final cachedRecordsResult =
           await _cacheService.getPlayRecordsDirect(context);
+      if (!mounted) return;
       if (cachedRecordsResult.success && cachedRecordsResult.data != null) {
         final cachedRecords = cachedRecordsResult.data!;
         // 只有当新数据与当前数据不同时才更新UI
@@ -189,8 +198,10 @@ class _FavoritesGridState extends State<FavoritesGrid>
 
   Future<void> _loadFavorites() async {
     try {
+      if (!mounted) return;
       // 使用缓存服务获取数据
       final result = await _cacheService.getFavorites(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {
@@ -206,8 +217,10 @@ class _FavoritesGridState extends State<FavoritesGrid>
 
   Future<void> _loadPlayRecords() async {
     try {
+      if (!mounted) return;
       // 使用缓存服务获取数据
       final result = await _cacheService.getPlayRecords(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {

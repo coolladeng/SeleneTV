@@ -442,6 +442,7 @@ class _SearchScreenState extends State<SearchScreen>
       _deletingHistoryItem = historyItem;
     });
     _deleteAnimationController?.forward().then((_) {
+      if (!mounted) return;
       // 动画完成后执行删除
       _deleteSearchHistory(historyItem);
     });

@@ -49,6 +49,8 @@ class _LiveScreenState extends State<LiveScreen>
   }
 
   void _scrollToTop() {
+    if (!mounted) return;
+
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         0,
@@ -59,6 +61,8 @@ class _LiveScreenState extends State<LiveScreen>
   }
 
   Future<void> _loadChannels({LiveSource? source}) async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -67,17 +71,16 @@ class _LiveScreenState extends State<LiveScreen>
     try {
       // 1. 获取所有直播源
       final liveSources = await LiveService.getLiveSources();
+      if (!mounted) return;
 
       if (liveSources.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = '暂无直播源';
-            _isLoading = false;
-            _isInitialLoad = false;
-            _liveSources = [];
-            _currentSource = null;
-          });
-        }
+        setState(() {
+          _errorMessage = '暂无直播源';
+          _isLoading = false;
+          _isInitialLoad = false;
+          _liveSources = [];
+          _currentSource = null;
+        });
         return;
       }
 
@@ -95,14 +98,13 @@ class _LiveScreenState extends State<LiveScreen>
 
       // 3. 获取该直播源的频道列表
       final channels = await LiveService.getLiveChannels(targetSource.key);
+      if (!mounted) return;
 
       if (channels.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = '该直播源暂无频道';
-            _isLoading = false;
-          });
-        }
+        setState(() {
+          _errorMessage = '该直播源暂无频道';
+          _isLoading = false;
+        });
         return;
       }
 
@@ -142,6 +144,8 @@ class _LiveScreenState extends State<LiveScreen>
   }
 
   Future<void> refreshChannels() async {
+    if (!mounted) return;
+
     setState(() {
       _isRefreshButtonHovered = false;
       _isRefreshing = true;
@@ -155,15 +159,14 @@ class _LiveScreenState extends State<LiveScreen>
       LiveService.clearAllChannelsAndEpgCache();
       // 1. 重新获取所有直播源
       final liveSources = await LiveService.getLiveSources(forceRefresh: true);
+      if (!mounted) return;
 
       if (liveSources.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = '暂无直播源';
-            _liveSources = [];
-            _currentSource = null;
-          });
-        }
+        setState(() {
+          _errorMessage = '暂无直播源';
+          _liveSources = [];
+          _currentSource = null;
+        });
         return;
       }
 
@@ -189,15 +192,14 @@ class _LiveScreenState extends State<LiveScreen>
 
       // 3. 获取目标源的频道列表
       final channels = await LiveService.getLiveChannels(targetSource.key);
+      if (!mounted) return;
 
       if (channels.isEmpty) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = '该直播源暂无频道';
-            _liveSources = liveSources;
-            _currentSource = targetSource;
-          });
-        }
+        setState(() {
+          _errorMessage = '该直播源暂无频道';
+          _liveSources = liveSources;
+          _currentSource = targetSource;
+        });
         return;
       }
 
@@ -247,6 +249,8 @@ class _LiveScreenState extends State<LiveScreen>
   }
 
   void _showMessage(String message) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -681,7 +685,11 @@ class _LiveScreenState extends State<LiveScreen>
               source: _currentSource!,
             ),
           ),
-        ).then((_) => _loadChannels());
+        ).then((_) {
+          if (mounted) {
+            _loadChannels();
+          }
+        });
       },
       buildChannelLogo: _buildChannelLogo,
     );

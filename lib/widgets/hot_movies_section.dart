@@ -47,6 +47,8 @@ class _HotMoviesSectionState extends State<HotMoviesSection> {
 
   /// 加载热门电影
   Future<void> _loadHotMovies() async {
+    if (!mounted) return;
+
     try {
       setState(() {
         _isLoading = true;
@@ -55,6 +57,7 @@ class _HotMoviesSectionState extends State<HotMoviesSection> {
 
       // 直接调用 DoubanService（内部已做函数级缓存）
       final result = await DoubanService.getHotMovies(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {
@@ -68,6 +71,7 @@ class _HotMoviesSectionState extends State<HotMoviesSection> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _hasError = true;
         _isLoading = false;

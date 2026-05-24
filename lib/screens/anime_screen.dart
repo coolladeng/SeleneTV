@@ -223,18 +223,19 @@ class _AnimeScreenState extends State<AnimeScreen> {
   void initState() {
     super.initState();
     _fetchAnimeData(isRefresh: true);
-    _scrollController.addListener(() {
-      _handleScroll();
-    });
+    _scrollController.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _handleScroll() {
+    if (!mounted) return;
+
     if (_scrollController.hasClients) {
       final position = _scrollController.position;
       
@@ -261,6 +262,7 @@ class _AnimeScreenState extends State<AnimeScreen> {
   }
 
   Future<void> _loadMoreAnimeData() async {
+    if (!mounted) return;
     if (_isLoading || _isLoadingMore || !_hasMore) return;
     if (_selectedCategoryValue == '每日放送') return; // Bangumi 数据不支持分页
 
@@ -366,6 +368,8 @@ class _AnimeScreenState extends State<AnimeScreen> {
   }
 
   Future<void> _fetchAnimeData({bool isRefresh = false}) async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       if (isRefresh) {

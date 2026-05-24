@@ -46,6 +46,8 @@ class _BangumiSectionState extends State<BangumiSection> {
 
   /// 加载新番放送数据
   Future<void> _loadBangumiCalendar() async {
+    if (!mounted) return;
+
     try {
       setState(() {
         _isLoading = true;
@@ -54,6 +56,7 @@ class _BangumiSectionState extends State<BangumiSection> {
 
       // 直接调用 BangumiService（内部函数级缓存）
       final result = await BangumiService.getTodayCalendar(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {
@@ -67,6 +70,7 @@ class _BangumiSectionState extends State<BangumiSection> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _hasError = true;
         _isLoading = false;

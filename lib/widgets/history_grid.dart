@@ -63,6 +63,8 @@ class _HistoryGridState extends State<HistoryGrid>
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -70,10 +72,12 @@ class _HistoryGridState extends State<HistoryGrid>
 
     try {
       await _loadPlayRecords();
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -93,8 +97,10 @@ class _HistoryGridState extends State<HistoryGrid>
   /// 刷新播放记录数据
   Future<void> _refreshPlayRecords() async {
     try {
+      if (!mounted) return;
       final cachedRecordsResult =
           await _cacheService.getPlayRecordsDirect(context);
+      if (!mounted) return;
       if (cachedRecordsResult.success && cachedRecordsResult.data != null) {
         final cachedRecords = cachedRecordsResult.data!;
         setState(() {
@@ -118,8 +124,10 @@ class _HistoryGridState extends State<HistoryGrid>
 
   Future<void> _loadPlayRecords() async {
     try {
+      if (!mounted) return;
       // 使用缓存服务获取数据
       final result = await _cacheService.getPlayRecords(context);
+      if (!mounted) return;
 
       if (result.success && result.data != null) {
         setState(() {

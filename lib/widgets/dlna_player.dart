@@ -101,6 +101,7 @@ class _DLNAPlayerState extends State<DLNAPlayer> {
     try {
       // 获取播放位置
       final positionStr = await widget.device.position();
+      if (!mounted) return;
       final p = PositionParser(positionStr);
 
       position = p;
@@ -108,6 +109,7 @@ class _DLNAPlayerState extends State<DLNAPlayer> {
       final newDuration = Duration(seconds: position?.TrackDurationInt ?? 0);
 
       final transportStr = await widget.device.getTransportInfo();
+      if (!mounted) return;
       final t = TransportInfoParser(transportStr);
 
       _isPlaying = t.CurrentTransportState == "PLAYING";
@@ -192,6 +194,8 @@ class _DLNAPlayerState extends State<DLNAPlayer> {
 
   /// 更新视频 URL
   void updateVideoUrl(String url, String title, {Duration? startAt}) {
+    if (!mounted) return;
+
     debugPrint('DLNA 更新视频 URL: $url, startAt: ${startAt?.inSeconds ?? 0}秒');
 
     widget.device.pause();

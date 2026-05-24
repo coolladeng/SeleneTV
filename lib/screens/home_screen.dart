@@ -56,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _checkForUpdates() async {
     // 延迟3秒后检查更新，避免影响页面加载
     await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
     try {
       final versionInfo = await VersionService.checkForUpdate();
@@ -119,33 +120,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 刷新首页数据
   Future<void> _refreshHomeData() async {
+    if (!mounted) return;
+
     try {
       // 调用各个组件的刷新方法
-      if (mounted) {
-        // 刷新继续观看组件
-        await ContinueWatchingSection.refreshPlayRecords();
+      // 刷新继续观看组件
+      await ContinueWatchingSection.refreshPlayRecords();
 
-        // 刷新播放历史组件
-        await HistoryGrid.refreshHistory();
+      // 刷新播放历史组件
+      await HistoryGrid.refreshHistory();
 
-        // 刷新收藏夹组件
-        await FavoritesGrid.refreshFavorites();
+      // 刷新收藏夹组件
+      await FavoritesGrid.refreshFavorites();
 
-        // 刷新热门电影组件
-        await HotMoviesSection.refreshHotMovies();
+      // 刷新热门电影组件
+      await HotMoviesSection.refreshHotMovies();
 
-        // 刷新热门剧集组件
-        await HotTvSection.refreshHotTvShows();
+      // 刷新热门剧集组件
+      await HotTvSection.refreshHotTvShows();
 
-        // 刷新新番放送组件
-        await BangumiSection.refreshBangumiCalendar();
+      // 刷新新番放送组件
+      await BangumiSection.refreshBangumiCalendar();
 
-        // 刷新热门综艺组件
-        await HotShowSection.refreshHotShows();
+      // 刷新热门综艺组件
+      await HotShowSection.refreshHotShows();
 
-        // 强制重建页面
-        setState(() {});
-      }
+      if (!mounted) return;
+      // 强制重建页面
+      setState(() {});
     } catch (e) {
       // 刷新失败，静默处理
     }
@@ -165,6 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: PageView(
             controller: _pageController,
             onPageChanged: (index) {
+              if (!mounted) return;
+
               // 根据页面索引更新选中的标签
               String newTab;
               switch (index) {
@@ -401,6 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return PageView(
       controller: _bottomNavPageController,
       onPageChanged: (index) {
+        if (!mounted) return;
         if (_currentBottomNavIndex != index) {
           setState(() {
             _currentBottomNavIndex = index;
@@ -420,6 +425,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 处理底部导航栏切换
   void _onBottomNavChanged(int index) {
+    if (!mounted) return;
+
     // 防止重复点击同一个标签
     if (_currentBottomNavIndex == index) {
       return;
@@ -430,15 +437,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // 使用动画切换到对应页面
-    _bottomNavPageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_bottomNavPageController.hasClients) {
+      _bottomNavPageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   /// 处理顶部标签切换
   void _onTopTabChanged(String tab) {
+    if (!mounted) return;
+
     // 防止重复点击同一个标签
     if (_selectedTopTab == tab) {
       return;
@@ -465,11 +476,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     // 使用动画切换到对应页面
-    _pageController.animateToPage(
-      pageIndex,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        pageIndex,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   /// 处理点击搜索按钮
@@ -482,7 +495,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ).then((_) {
         // 从搜索页面返回时刷新数据
-        _refreshOnResume();
+        if (mounted) {
+          _refreshOnResume();
+        }
       });
     } else {
       Navigator.push(
@@ -495,13 +510,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ).then((_) {
         // 从搜索页面返回时刷新数据
-        _refreshOnResume();
+        if (mounted) {
+          _refreshOnResume();
+        }
       });
     }
   }
 
   /// 处理点击 Selene 标题跳转到首页
   void _onHomeTap() {
+    if (!mounted) return;
+
     setState(() {
       // 切换到首页
       _currentBottomNavIndex = 0;
@@ -510,18 +529,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // 使用动画切换到首页
-    _bottomNavPageController.animateToPage(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_bottomNavPageController.hasClients) {
+      _bottomNavPageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
 
     // 同时切换顶部标签到首页
-    _pageController.animateToPage(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   /// 处理视频卡片点击
@@ -687,6 +710,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (context) => playerScreen),
     );
 
+    if (!mounted) return;
     _refreshOnResume();
   }
 

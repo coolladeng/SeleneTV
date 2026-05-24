@@ -181,7 +181,8 @@ class _ShowScreenState extends State<ShowScreen> {
 
   /// 检查内容是否不足一屏，如果是则自动加载更多
   void _checkAndLoadMoreIfNeeded() {
-    if (!_scrollController.hasClients ||
+    if (!mounted ||
+        !_scrollController.hasClients ||
         !_hasMore ||
         _isLoading ||
         _isLoadingMore) {
@@ -281,6 +282,7 @@ class _ShowScreenState extends State<ShowScreen> {
         // 如果是刷新且内容不足一屏，尝试自动加载更多
         if (isRefresh && result.success && result.data != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             _checkAndLoadMoreIfNeeded();
           });
         }
@@ -319,6 +321,7 @@ class _ShowScreenState extends State<ShowScreen> {
         // 如果是刷新且内容不足一屏，尝试自动加载更多
         if (isRefresh && result.success && result.data != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             _checkAndLoadMoreIfNeeded();
           });
         }
