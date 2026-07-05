@@ -115,127 +115,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
-锘? // 棰勭疆鏈嶅姟閫夋嫨
-  void _handleServiceSelect(PresetService service) async {
-    if (service.type == 'subscription') {
-      final content = await _fetchSubscriptionContent(service.url);
-      if (content != null && mounted) {
-        setState(() {
-          _isLocalMode = true;
-          _subscriptionUrlController.text = service.url;
-        });
-        _showToast('宸查€夋嫨: ${service.name}', const Color(0xFF27ae60));
-      }
-    }
-  }
-
-  Future<String?> _fetchSubscriptionContent(String url) async {
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        return response.body.trim();
-      }
-    } catch (e) {
-      _showToast('鍔犺浇澶辫触: 缃戠粶涓嶅彲鐢?, const Color(0xFFe74c3c));
-    }
-    return null;
-  }
-
-  // 鏈嶅姟閫夋嫨鍣ㄧ粍浠?
-  Widget _buildServiceSelector() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '鍏叡鏈嶅姟',
-            style: FontUtils.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF7f8c8d),
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: PresetServices.services.length,
-            itemBuilder: (context, index) {
-              final service = PresetServices.services[index];
-              final isSelected = _isLocalMode && _subscriptionUrlController.text == service.url;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Material(
-                  color: isSelected ? const Color(0xFFe8f4fd) : Colors.white.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () => _handleServiceSelect(service),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Icon(
-                            service.icon == 'movie' ? Icons.movie :
-                            service.icon == 'movie_filter' ? Icons.movie_filter :
-                            service.icon == 'live_tv' ? Icons.live_tv :
-                            Icons.video_library,
-                            size: 22,
-                            color: isSelected ? const Color(0xFF2980b9) : const Color(0xFF95a5a6),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  service.name,
-                                  style: FontUtils.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected ? const Color(0xFF2c3e50) : const Color(0xFF34495e),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  service.description,
-                                  style: FontUtils.poppins(
-                                    fontSize: 11,
-                                    color: const Color(0xFF95a5a6),
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isSelected)
-                            const Icon(Icons.check_circle, size: 20, color: Color(0xFF27ae60)),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            },
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: Color(0xFFd5dbdb)),
-          const SizedBox(height: 8),
-          Text(
-            _isLocalMode ? '鎴栨墜鍔ㄨ緭鍏ヨ闃呴摼鎺? : '鎴栨墜鍔ㄨ緭鍏ユ湇鍔″櫒淇℃伅',
-            style: FontUtils.poppins(
-              fontSize: 12,
-              color: const Color(0xFFbdc3c7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   void _validateForm() {
     if (!mounted) return;
@@ -695,7 +574,58 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildServiceSelector(),
+// ?????????
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('????', style: FontUtils.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF7f8c8d), letterSpacing: 0.5)),
+              const SizedBox(height: 10),
+              ...PresetServices.services.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Material(
+                  color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFFe8f4fd) : Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      if (s.type == 'subscription') {
+                        try {
+                          final resp = await http.get(Uri.parse(s.url));
+                          if (resp.statusCode == 200 && mounted) {
+                            setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
+                            _showToast('Selected: ${s.name}', const Color(0xFF27ae60));
+                          }
+                        } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Icon(Icons.video_library, size: 22, color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFF2980b9) : const Color(0xFF95a5a6)),
+                          const SizedBox(width: 12),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(s.name, style: FontUtils.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFF2c3e50) : const Color(0xFF34495e))),
+                            const SizedBox(height: 2),
+                            Text(s.description, style: FontUtils.poppins(fontSize: 11, color: const Color(0xFF95a5a6)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          ])),
+                          if (_isLocalMode && _subscriptionUrlController.text == s.url) const Icon(Icons.check_circle, size: 20, color: Color(0xFF27ae60)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFd5dbdb)),
+              const SizedBox(height: 8),
+              Text(_isLocalMode ? 'or manual subscription' : 'or manual server info', style: FontUtils.poppins(fontSize: 12, color: const Color(0xFFbdc3c7))),
+            ],
+          ),
+        ),
+
         // Selene 鏍囬 - 鍙偣鍑?
         GestureDetector(
           onTap: _handleLogoTap,
