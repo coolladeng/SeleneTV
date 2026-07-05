@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isFormValid = false;
   bool _isLocalMode = false;
 
-  // 鐐瑰嚮璁℃暟鍣ㄧ浉鍏?
+  // 点击计数器相关
   int _logoTapCount = 0;
   Timer? _tapTimer;
 
@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       hasData = true;
     }
 
-    // 鍔犺浇璁㈤槄閾炬帴锛堢敤浜庡洖濉級
+    // 加载订阅链接（用于回填）
     final subscriptionUrl = await LocalModeStorageService.getSubscriptionUrl();
     if (!mounted) return;
 
@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
       hasData = true;
     }
 
-    // 濡傛灉鏈夋暟鎹鍔犺浇锛屾洿鏂癠I鐘舵€?
+    // 如果有数据被加载，更新UI状态
     if (hasData && mounted) {
       _validateForm();
     }
@@ -91,10 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogoTap() {
     _logoTapCount++;
 
-    // 鍙栨秷涔嬪墠鐨勮鏃跺櫒
+    // 取消之前的计时器
     _tapTimer?.cancel();
 
-    // 濡傛灉杈惧埌10娆★紝鍒囨崲鍒版湰鍦版ā寮?
+    // 如果达到10次，切换到本地模式
     if (_logoTapCount >= 10) {
       setState(() {
         _isLocalMode = !_isLocalMode;
@@ -102,11 +102,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _logoTapCount = 0;
       });
       _showToast(
-        _isLocalMode ? '宸插垏鎹㈠埌鏈湴妯″紡' : '宸插垏鎹㈠埌鏈嶅姟鍣ㄦā寮?,
+        _isLocalMode ? '已切换到本地模式' : '已切换到服务器模式',
         const Color(0xFF27ae60),
       );
     } else {
-      // 璁剧疆鏂扮殑璁℃椂鍣紝2绉掑悗閲嶇疆璁℃暟
+      // 设置新的计时器，2秒后重置计数
       _tapTimer = Timer(const Duration(seconds: 1), () {
         if (!mounted) return;
         setState(() {
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  // 澶勭悊鍥炶溅閿彁浜?
+  // 处理回车键提交
   void _handleSubmit() {
     if (_isLocalMode) {
       _handleLocalModeLogin();
@@ -143,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 璁㈤槄閾炬帴杈撳叆妗?
+        // 订阅链接输入框
         TextFormField(
           controller: _subscriptionUrlController,
           style: FontUtils.poppins(
@@ -151,12 +151,12 @@ class _LoginScreenState extends State<LoginScreen> {
             color: const Color(0xFF2c3e50),
           ),
           decoration: InputDecoration(
-            labelText: '璁㈤槄閾炬帴',
+            labelText: '订阅链接',
             labelStyle: FontUtils.poppins(
               color: const Color(0xFF7f8c8d),
               fontSize: 14,
             ),
-            hintText: '璇疯緭鍏ヨ闃呴摼鎺?,
+            hintText: '请输入订阅链接',
             hintStyle: FontUtils.poppins(
               color: const Color(0xFFbdc3c7),
               fontSize: 16,
@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return '璇疯緭鍏ヨ闃呴摼鎺?;
+              return '请输入订阅链接';
             }
             return null;
           },
@@ -196,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 32),
 
-        // 鐧诲綍鎸夐挳
+        // 登录按钮
         ElevatedButton(
           onPressed:
               (_isLoading || !_isFormValid) ? null : _handleLocalModeLogin,
@@ -230,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '鐧诲綍涓?..',
+                      '登录中...',
                       style: FontUtils.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -240,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 )
               : Text(
-                  '鐧诲綍',
+                  '登录',
                   style: FontUtils.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -253,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _processUrl(String url) {
-    // 鍘婚櫎灏鹃儴鏂滄潬
+    // 去除尾部斜杠
     String processedUrl = url.trim();
     if (processedUrl.endsWith('/')) {
       processedUrl = processedUrl.substring(0, processedUrl.length - 1);
@@ -262,13 +262,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _parseCookies(http.Response response) {
-    // 瑙ｆ瀽 Set-Cookie 澶撮儴
+    // 解析 Set-Cookie 头部
     List<String> cookies = [];
 
-    // 鑾峰彇鎵€鏈?Set-Cookie 澶撮儴
+    // 获取所有 Set-Cookie 头部
     final setCookieHeaders = response.headers['set-cookie'];
     if (setCookieHeaders != null) {
-      // HTTP 澶撮儴閫氬父鏄?String 绫诲瀷
+      // HTTP 头部通常是 String 类型
       final cookieParts = setCookieHeaders.split(';');
       if (cookieParts.isNotEmpty) {
         cookies.add(cookieParts[0].trim());
@@ -308,11 +308,11 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        // 澶勭悊 URL
+        // 处理 URL
         String baseUrl = _processUrl(_urlController.text);
         String loginUrl = '$baseUrl/api/login';
 
-        // 鍙戦€佺櫥褰曡姹?
+        // 发送登录请求
         final response = await http.post(
           Uri.parse(loginUrl),
           headers: {
@@ -329,13 +329,13 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
         });
 
-        // 鏍规嵁鐘舵€佺爜鏄剧ず涓嶅悓鐨勬秷鎭?
+        // 根据状态码显示不同的消息
         switch (response.statusCode) {
           case 200:
-            // 瑙ｆ瀽骞朵繚瀛?cookies
+            // 解析并保存 cookies
             String cookies = _parseCookies(response);
 
-            // 淇濆瓨鐢ㄦ埛鏁版嵁
+            // 保存用户数据
             await UserDataService.saveUserData(
               serverUrl: baseUrl,
               username: _usernameController.text,
@@ -344,13 +344,13 @@ class _LoginScreenState extends State<LoginScreen> {
             );
             if (!mounted) return;
 
-            // 淇濆瓨妯″紡鐘舵€佷负鏈嶅姟鍣ㄦā寮?
+            // 保存模式状态为服务器模式
             await UserDataService.saveIsLocalMode(false);
             if (!mounted) return;
 
-            // _showToast('鐧诲綍鎴愬姛锛?, const Color(0xFF27ae60));
+            // _showToast('登录成功！', const Color(0xFF27ae60));
 
-            // 璺宠浆鍒伴椤碉紝骞舵竻闄ゆ墍鏈夎矾鐢辨爤锛堝己鍒堕攢姣佹墍鏈夋棫椤甸潰锛?
+            // 跳转到首页，并清除所有路由栈（强制销毁所有旧页面）
             if (mounted) {
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -359,20 +359,20 @@ class _LoginScreenState extends State<LoginScreen> {
             }
             break;
           case 401:
-            _showToast('鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒', const Color(0xFFe74c3c));
+            _showToast('用户名或密码错误', const Color(0xFFe74c3c));
             break;
           case 500:
-            _showToast('鏈嶅姟鍣ㄩ敊璇?, const Color(0xFFe74c3c));
+            _showToast('服务器错误', const Color(0xFFe74c3c));
             break;
           default:
-            _showToast('缃戠粶寮傚父', const Color(0xFFe74c3c));
+            _showToast('网络异常', const Color(0xFFe74c3c));
         }
       } catch (e) {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-        _showToast('缃戠粶寮傚父', const Color(0xFFe74c3c));
+        _showToast('网络异常', const Color(0xFFe74c3c));
       }
     }
   }
@@ -386,7 +386,7 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         final newUrl = _subscriptionUrlController.text.trim();
 
-        // 鑾峰彇骞惰В鏋愯闃呭唴瀹?
+        // 获取并解析订阅内容
         final response = await http.get(Uri.parse(newUrl));
         if (!mounted) return;
 
@@ -394,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> {
           setState(() {
             _isLoading = false;
           });
-          _showToast('鑾峰彇璁㈤槄鍐呭澶辫触', const Color(0xFFe74c3c));
+          _showToast('获取订阅内容失败', const Color(0xFFe74c3c));
           return;
         }
 
@@ -408,18 +408,18 @@ class _LoginScreenState extends State<LoginScreen> {
           setState(() {
             _isLoading = false;
           });
-          _showToast('瑙ｆ瀽璁㈤槄鍐呭澶辫触', const Color(0xFFe74c3c));
+          _showToast('解析订阅内容失败', const Color(0xFFe74c3c));
           return;
         }
 
-        // 妫€鏌ユ槸鍚﹀凡鏈夎闃?URL
+        // 检查是否已有订阅 URL
         final existingUrl = await LocalModeStorageService.getSubscriptionUrl();
         if (!mounted) return;
 
         if (existingUrl != null &&
             existingUrl.isNotEmpty &&
             existingUrl != newUrl) {
-          // 寮圭獥璇㈤棶鏄惁娓呯┖
+          // 弹窗询问是否清空
           setState(() {
             _isLoading = false;
           });
@@ -430,7 +430,7 @@ class _LoginScreenState extends State<LoginScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                '鎻愮ず',
+                '提示',
                 style: FontUtils.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -438,7 +438,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               content: Text(
-                '妫€娴嬪埌宸叉湁鏈湴妯″紡鍐呭涓旇闃呴摼鎺ヤ笉涓€鑷达紝鏄惁娓呯┖鍏ㄩ儴鏈湴妯″紡瀛樺偍锛?,
+                '检测到已有本地模式内容且订阅链接不一致，是否清空全部本地模式存储？',
                 style: FontUtils.poppins(
                   fontSize: 14,
                   color: const Color(0xFF2c3e50),
@@ -448,7 +448,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
-                    '鍚?,
+                    '否',
                     style: FontUtils.poppins(
                       fontSize: 14,
                       color: const Color(0xFF7f8c8d),
@@ -458,7 +458,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(
-                    '鏄?,
+                    '是',
                     style: FontUtils.poppins(
                       fontSize: 14,
                       color: const Color(0xFFe74c3c),
@@ -475,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
             await LocalModeStorageService.clearAllLocalModeData();
             if (!mounted) return;
           } else if (shouldClear == null) {
-            // 鐢ㄦ埛鍙栨秷浜嗗璇濇
+            // 用户取消了对话框
             return;
           }
 
@@ -484,7 +484,7 @@ class _LoginScreenState extends State<LoginScreen> {
           });
         }
 
-        // 淇濆瓨璁㈤槄閾炬帴鍜屽唴瀹?
+        // 保存订阅链接和内容
         await LocalModeStorageService.saveSubscriptionUrl(newUrl);
         if (!mounted) return;
         if (content.searchResources != null && content.searchResources!.isNotEmpty) {
@@ -496,7 +496,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (!mounted) return;
         }
 
-        // 淇濆瓨妯″紡鐘舵€佷负鏈湴妯″紡
+        // 保存模式状态为本地模式
         await UserDataService.saveIsLocalMode(true);
         if (!mounted) return;
 
@@ -504,9 +504,9 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
         });
 
-        // _showToast('鏈湴妯″紡鐧诲綍鎴愬姛锛?, const Color(0xFF27ae60));
+        // _showToast('本地模式登录成功！', const Color(0xFF27ae60));
 
-        // 璺宠浆鍒伴椤碉紝骞舵竻闄ゆ墍鏈夎矾鐢辨爤锛堝己鍒堕攢姣佹墍鏈夋棫椤甸潰锛?
+        // 跳转到首页，并清除所有路由栈（强制销毁所有旧页面）
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -518,7 +518,7 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           _isLoading = false;
         });
-        _showToast('鐧诲綍澶辫触锛?{e.toString()}', const Color(0xFFe74c3c));
+        _showToast('登录失败：${e.toString()}', const Color(0xFFe74c3c));
       }
     }
   }
@@ -546,9 +546,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Column(
           children: [
-            // Windows 鑷畾涔夋爣棰樻爮锛堥€忔槑鑳屾櫙锛?
+            // Windows 自定义标题栏（透明背景）
             if (Platform.isWindows) const WindowsTitleBar(forceBlack: true),
-            // 涓昏鍐呭
+            // 主要内容
             Expanded(
               child: SafeArea(
                 child: Center(
@@ -569,18 +569,18 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // 鎵嬫満绔竷灞€锛堜繚鎸佸師鏍凤級
+  // 手机端布局（保持原样）
   Widget _buildMobileLayout() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-// ?????????
+        // Preset public services selector
         Padding(
           padding: const EdgeInsets.only(bottom: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('????', style: FontUtils.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF7f8c8d), letterSpacing: 0.5)),
+              Text('Preset Services', style: FontUtils.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF7f8c8d), letterSpacing: 0.5)),
               const SizedBox(height: 10),
               ...PresetServices.services.map((s) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -595,7 +595,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           final resp = await http.get(Uri.parse(s.url));
                           if (resp.statusCode == 200 && mounted) {
                             setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
-                            _showToast('Selected: ${s.name}', const Color(0xFF27ae60));
+                            _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
                           }
                         } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
                       }
@@ -626,7 +626,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
 
-        // Selene 鏍囬 - 鍙偣鍑?
+
+        // Selene 标题 - 可点击
         GestureDetector(
           onTap: _handleLogoTap,
           child: Text(
@@ -641,7 +642,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 40),
 
-        // 鐧诲綍琛ㄥ崟 - 鏃犺竟妗嗚璁?
+        // 登录表单 - 无边框设计
         Form(
           key: _formKey,
           child: _isLocalMode
@@ -649,7 +650,7 @@ class _LoginScreenState extends State<LoginScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // URL 杈撳叆妗?
+                    // URL 输入框
                     TextFormField(
                       controller: _urlController,
                       style: FontUtils.poppins(
@@ -657,7 +658,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: const Color(0xFF2c3e50),
                       ),
                       decoration: InputDecoration(
-                        labelText: '鏈嶅姟鍣ㄥ湴鍧€',
+                        labelText: '服务器地址',
                         labelStyle: FontUtils.poppins(
                           color: const Color(0xFF7f8c8d),
                           fontSize: 14,
@@ -693,13 +694,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '璇疯緭鍏ユ湇鍔″櫒鍦板潃';
+                          return '请输入服务器地址';
                         }
                         final uri = Uri.tryParse(value);
                         if (uri == null ||
                             uri.scheme.isEmpty ||
                             uri.host.isEmpty) {
-                          return '璇疯緭鍏ユ湁鏁堢殑URL鍦板潃';
+                          return '请输入有效的URL地址';
                         }
                         return null;
                       },
@@ -707,7 +708,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // 鐢ㄦ埛鍚嶈緭鍏ユ
+                    // 用户名输入框
                     TextFormField(
                       controller: _usernameController,
                       style: FontUtils.poppins(
@@ -715,12 +716,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: const Color(0xFF2c3e50),
                       ),
                       decoration: InputDecoration(
-                        labelText: '鐢ㄦ埛鍚?,
+                        labelText: '用户名',
                         labelStyle: FontUtils.poppins(
                           color: const Color(0xFF7f8c8d),
                           fontSize: 14,
                         ),
-                        hintText: '璇疯緭鍏ョ敤鎴峰悕',
+                        hintText: '请输入用户名',
                         hintStyle: FontUtils.poppins(
                           color: const Color(0xFFbdc3c7),
                           fontSize: 16,
@@ -751,7 +752,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '璇疯緭鍏ョ敤鎴峰悕';
+                          return '请输入用户名';
                         }
                         return null;
                       },
@@ -759,7 +760,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // 瀵嗙爜杈撳叆妗?
+                    // 密码输入框
                     TextFormField(
                       controller: _passwordController,
                       obscureText: !_isPasswordVisible,
@@ -768,12 +769,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: const Color(0xFF2c3e50),
                       ),
                       decoration: InputDecoration(
-                        labelText: '瀵嗙爜',
+                        labelText: '密码',
                         labelStyle: FontUtils.poppins(
                           color: const Color(0xFF7f8c8d),
                           fontSize: 14,
                         ),
-                        hintText: '璇疯緭鍏ュ瘑鐮?,
+                        hintText: '请输入密码',
                         hintStyle: FontUtils.poppins(
                           color: const Color(0xFFbdc3c7),
                           fontSize: 16,
@@ -818,7 +819,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '璇疯緭鍏ュ瘑鐮?;
+                          return '请输入密码';
                         }
                         return null;
                       },
@@ -826,17 +827,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // 鐧诲綍鎸夐挳
+                    // 登录按钮
                     ElevatedButton(
                       onPressed:
                           (_isLoading || !_isFormValid) ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isFormValid && !_isLoading
-                            ? const Color(0xFF2c3e50) // 涓嶴elene logo鐩稿悓鐨勯鑹?
-                            : const Color(0xFFbdc3c7), // 绂佺敤鏃剁殑娴呯伆鑹?
+                            ? const Color(0xFF2c3e50) // 与Selene logo相同的颜色
+                            : const Color(0xFFbdc3c7), // 禁用时的浅灰色
                         foregroundColor: _isFormValid && !_isLoading
                             ? Colors.white
-                            : const Color(0xFF7f8c8d), // 绂佺敤鏃剁殑鏂囧瓧棰滆壊
+                            : const Color(0xFF7f8c8d), // 禁用时的文字颜色
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -860,7 +861,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  '鐧诲綍涓?..',
+                                  '登录中...',
                                   style: FontUtils.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
@@ -870,7 +871,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             )
                           : Text(
-                              '鐧诲綍',
+                              '登录',
                               style: FontUtils.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -885,7 +886,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // 骞虫澘绔竷灞€锛堜笌鎵嬫満绔鏍间竴鑷达紝鍙槸闄愬埗瀹藉害锛?
+  // 平板端布局（与手机端风格一致，只是限制宽度）
   Widget _buildTabletLayout() {
     return Container(
       constraints: const BoxConstraints(maxWidth: 480),
@@ -893,7 +894,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Selene 鏍囬 - 鍙偣鍑?
+          // Selene 标题 - 可点击
           GestureDetector(
             onTap: _handleLogoTap,
             child: Text(
@@ -908,7 +909,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 40),
 
-          // 鐧诲綍琛ㄥ崟 - 鏃犺竟妗嗚璁?
+          // 登录表单 - 无边框设计
           Form(
             key: _formKey,
             child: _isLocalMode
@@ -916,7 +917,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // URL 杈撳叆妗?
+                      // URL 输入框
                       TextFormField(
                         controller: _urlController,
                         style: FontUtils.poppins(
@@ -924,7 +925,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: const Color(0xFF2c3e50),
                         ),
                         decoration: InputDecoration(
-                          labelText: '鏈嶅姟鍣ㄥ湴鍧€',
+                          labelText: '服务器地址',
                           labelStyle: FontUtils.poppins(
                             color: const Color(0xFF7f8c8d),
                             fontSize: 14,
@@ -960,13 +961,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '璇疯緭鍏ユ湇鍔″櫒鍦板潃';
+                            return '请输入服务器地址';
                           }
                           final uri = Uri.tryParse(value);
                           if (uri == null ||
                               uri.scheme.isEmpty ||
                               uri.host.isEmpty) {
-                            return '璇疯緭鍏ユ湁鏁堢殑URL鍦板潃';
+                            return '请输入有效的URL地址';
                           }
                           return null;
                         },
@@ -974,7 +975,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // 鐢ㄦ埛鍚嶈緭鍏ユ
+                      // 用户名输入框
                       TextFormField(
                         controller: _usernameController,
                         style: FontUtils.poppins(
@@ -982,12 +983,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: const Color(0xFF2c3e50),
                         ),
                         decoration: InputDecoration(
-                          labelText: '鐢ㄦ埛鍚?,
+                          labelText: '用户名',
                           labelStyle: FontUtils.poppins(
                             color: const Color(0xFF7f8c8d),
                             fontSize: 14,
                           ),
-                          hintText: '璇疯緭鍏ョ敤鎴峰悕',
+                          hintText: '请输入用户名',
                           hintStyle: FontUtils.poppins(
                             color: const Color(0xFFbdc3c7),
                             fontSize: 16,
@@ -1018,7 +1019,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '璇疯緭鍏ョ敤鎴峰悕';
+                            return '请输入用户名';
                           }
                           return null;
                         },
@@ -1026,7 +1027,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // 瀵嗙爜杈撳叆妗?
+                      // 密码输入框
                       TextFormField(
                         controller: _passwordController,
                         obscureText: !_isPasswordVisible,
@@ -1035,12 +1036,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: const Color(0xFF2c3e50),
                         ),
                         decoration: InputDecoration(
-                          labelText: '瀵嗙爜',
+                          labelText: '密码',
                           labelStyle: FontUtils.poppins(
                             color: const Color(0xFF7f8c8d),
                             fontSize: 14,
                           ),
-                          hintText: '璇疯緭鍏ュ瘑鐮?,
+                          hintText: '请输入密码',
                           hintStyle: FontUtils.poppins(
                             color: const Color(0xFFbdc3c7),
                             fontSize: 16,
@@ -1085,7 +1086,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '璇疯緭鍏ュ瘑鐮?;
+                            return '请输入密码';
                           }
                           return null;
                         },
@@ -1093,7 +1094,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // 鐧诲綍鎸夐挳
+                      // 登录按钮
                       ElevatedButton(
                         onPressed:
                             (_isLoading || !_isFormValid) ? null : _handleLogin,
@@ -1127,7 +1128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    '鐧诲綍涓?..',
+                                    '登录中...',
                                     style: FontUtils.poppins(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
@@ -1137,7 +1138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               )
                             : Text(
-                                '鐧诲綍',
+                                '登录',
                                 style: FontUtils.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
