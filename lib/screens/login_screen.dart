@@ -894,6 +894,59 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+                  // Preset public services selector
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Preset Services', style: FontUtils.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF7f8c8d), letterSpacing: 0.5)),
+              const SizedBox(height: 10),
+              ...PresetServices.services.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Material(
+                  color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFFe8f4fd) : Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      if (s.type == 'subscription') {
+                        try {
+                          final resp = await http.get(Uri.parse(s.url));
+                          if (resp.statusCode == 200 && mounted) {
+                            setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
+                            _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
+                          }
+                        } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Icon(Icons.video_library, size: 22, color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFF2980b9) : const Color(0xFF95a5a6)),
+                          const SizedBox(width: 12),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(s.name, style: FontUtils.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFF2c3e50) : const Color(0xFF34495e))),
+                            const SizedBox(height: 2),
+                            Text(s.description, style: FontUtils.poppins(fontSize: 11, color: const Color(0xFF95a5a6)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          ])),
+                          if (_isLocalMode && _subscriptionUrlController.text == s.url) const Icon(Icons.check_circle, size: 20, color: Color(0xFF27ae60)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFd5dbdb)),
+              const SizedBox(height: 8),
+              Text(_isLocalMode ? 'or manual subscription' : 'or manual server info', style: FontUtils.poppins(fontSize: 12, color: const Color(0xFFbdc3c7))),
+            ],
+          ),
+        ),
+
+
           // Selene 标题 - 可点击
           GestureDetector(
             onTap: _handleLogoTap,
