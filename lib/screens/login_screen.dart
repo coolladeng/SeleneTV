@@ -10,6 +10,7 @@ import '../utils/device_utils.dart';
 import '../utils/font_utils.dart';
 import '../widgets/windows_title_bar.dart';
 import 'home_screen.dart';
+import '../widgets/tv_focus_wrapper.dart';
 import '../models/preset_services.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -584,22 +585,25 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
               ...PresetServices.services.map((s) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Material(
+                child: TvFocusWrapper(
+                  autofocus: true,
+                  onTap: () async {
+                    if (s.type == 'subscription') {
+                      try {
+                        final resp = await http.get(Uri.parse(s.url));
+                        if (resp.statusCode == 200 && mounted) {
+                          setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
+                          _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
+                        }
+                      } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
+                    }
+                  },
+                  child: Material(
                   color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFFe8f4fd) : Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      if (s.type == 'subscription') {
-                        try {
-                          final resp = await http.get(Uri.parse(s.url));
-                          if (resp.statusCode == 200 && mounted) {
-                            setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
-                            _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
-                          }
-                        } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
-                      }
-                    },
+                    onTap: null,
                     child: Padding(
                       padding: const EdgeInsets.all(14),
                       child: Row(
@@ -618,6 +622,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               )),
+              ),
               const SizedBox(height: 12),
               const Divider(height: 1, color: Color(0xFFd5dbdb)),
               const SizedBox(height: 8),
@@ -904,22 +909,24 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
               ...PresetServices.services.map((s) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Material(
+                child: TvFocusWrapper(
+                  onTap: () async {
+                    if (s.type == 'subscription') {
+                      try {
+                        final resp = await http.get(Uri.parse(s.url));
+                        if (resp.statusCode == 200 && mounted) {
+                          setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
+                          _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
+                        }
+                      } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
+                    }
+                  },
+                  child: Material(
                   color: _isLocalMode && _subscriptionUrlController.text == s.url ? const Color(0xFFe8f4fd) : Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      if (s.type == 'subscription') {
-                        try {
-                          final resp = await http.get(Uri.parse(s.url));
-                          if (resp.statusCode == 200 && mounted) {
-                            setState(() { _isLocalMode = true; _subscriptionUrlController.text = s.url; });
-                            _showToast('Selected: ' + s.name, const Color(0xFF27ae60));
-                          }
-                        } catch (_) { _showToast('Load failed', const Color(0xFFe74c3c)); }
-                      }
-                    },
+                    onTap: null,
                     child: Padding(
                       padding: const EdgeInsets.all(14),
                       child: Row(
@@ -938,6 +945,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               )),
+              ),
               const SizedBox(height: 12),
               const Divider(height: 1, color: Color(0xFFd5dbdb)),
               const SizedBox(height: 8),
@@ -1148,7 +1156,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 32),
 
                       // 登录按钮
-                      ElevatedButton(
+                      TvFocusWrapper(
+                    onTap: _isFormValid && !_isLoading ? _handleLogin : null,
+                    focusColor: const Color(0xFF2c3e50),
+                    scale: 1.02,
+                    child: FittedBox(
+                      child: ElevatedButton(
                         onPressed:
                             (_isLoading || !_isFormValid) ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
